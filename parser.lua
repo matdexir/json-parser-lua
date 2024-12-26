@@ -10,7 +10,7 @@ function Parser:new(json_str)
 	self.json_str = json_str
 end
 
---@return any
+---@return any
 ---@return number
 function Parser:generic_parse()
 	local c = self.json_str:sub(1, 1)
@@ -25,6 +25,8 @@ function Parser:generic_parse()
 	end
 end
 
+---@return table
+---@return number
 function Parser:parse_array(i)
 	local array_content = {}
 	local idx = 1
@@ -79,6 +81,10 @@ function Parser:parse_value(i)
 	if c == '"' then
 		local str = ""
 		i = i + 1
+		local str_end_idx = self.json_str:find('"', i)
+		if str_end_idx == nil then
+			error("string {" .. self.json_str:sub(i - 1, #self.json_str) .. "} is not terminated")
+		end
 		while true do
 			c = self.json_str:sub(i, i)
 			if c == '"' then
