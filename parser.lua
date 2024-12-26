@@ -141,6 +141,10 @@ local parser = Parser(minify_json(json_str))
 print(parser.json_str)
 
 local result = parser:generic_parse()
-for index, value in pairs(result) do
-	print(index, value)
+if type(result) == "table" then
+	for index, value in pairs(result) do
+		print(index, value, type(value))
+	end
+else
+	print(result, type(result))
 end
