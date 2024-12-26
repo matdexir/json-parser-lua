@@ -1,13 +1,16 @@
 Object = require("classic")
 Parser = Object:extend()
 
+local BoxedNil = {}
+BoxedNil.value = nil
+
 --- comment
 --- @param json_str string
 function Parser:new(json_str)
 	self.json_str = json_str
 end
 
----@return any
+--@return any
 ---@return number
 function Parser:generic_parse()
 	local c = self.json_str:sub(1, 1)
@@ -16,14 +19,32 @@ function Parser:generic_parse()
 		error("NOT IMPLEMENTED")
 		self.parse_obj(self)
 	elseif c == "[" then
-		error("NOT IMPLEMENTED")
-		self.parse_array(self)
+		return self.parse_array(self, 1)
 	else
 		return self.parse_value(self, 1)
 	end
 end
 
-function Parser:parse_array(self) end
+function Parser:parse_array(i)
+	local array_content = {}
+	local idx = 1
+	i = i + 1
+
+	while true do
+		local value, new_i = self:parse_value(i)
+		array_content[idx] = value
+		idx = idx + 1
+
+		i = new_i + 1
+		local c = self.json_str:sub(i, i)
+		print(c, i)
+		if c == "]" then
+			return array_content, i + 1
+		elseif c == "," then
+			i = i + 1
+		end
+	end
+end
 
 ---comment
 ---@param i number
@@ -34,23 +55,24 @@ function Parser:parse_value(i)
 
 	-- parse null
 	if c == "n" then
-		assert(self.json_str:sub(i, i + 4) == "null", "Expected Null")
-		return nil, i + 4
+		print(self.json_str:sub(i, i + 3))
+		assert(self.json_str:sub(i, i + 3) == "null", "Expected Null")
+		return BoxedNil, i + 3
 	end
 
 	-- parse true or false
 	if c == "t" then
 		assert(self.json_str:sub(i, i + 4) == "true", "Expected True")
-		return true, i + 4
+		return true, i + 3
 	elseif c == "f" then
 		assert(self.json_str:sub(i, i + 5) == "false", "Expected True")
-		return false, i + 5
+		return false, i + 4
 	end
 
 	-- parse number
 	if c:match("[0-9%-]") then
-		local num_str, new_i = self.json_str:match("([%-]?[0-9%.eE+%-]+)", i)
-		return tonumber(num_str), new_i
+		local num_str = self.json_str:match("([%-]?[0-9%.eE+%-]+)", i)
+		return tonumber(num_str), i + #num_str - 1
 	end
 
 	-- parse string
@@ -88,16 +110,18 @@ function Parser:parse_value(i)
 			end
 			i = i + 1
 		end
-		return str, i + 1
+		return str, i
 	end
 	error("Unexpected character: " .. c)
 end
 
 function Parser:parse_obj() end
 
-local json_str = '"word"'
+local json_str = '[1,"zurg","buzz",null]'
 
 local parser = Parser(json_str)
 
 local result = parser:generic_parse()
-print(result, type(result))
+for index, value in pairs(result) do
+	print(index, value)
+end
