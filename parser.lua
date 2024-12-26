@@ -123,9 +123,22 @@ end
 
 function Parser:parse_obj() end
 
-local json_str = '[1,"zurg","buzz",null]'
+---@param json string
+---@return string
+local minify_json = function(json)
+	-- Remove whitespace (spaces, tabs, and newlines) between tokens
+	json = json:gsub("%s+", "") -- Remove all spaces, tabs, and newlines
 
-local parser = Parser(json_str)
+	-- Optional: handle cases where commas or colons might have extra spaces around them
+	json = json:gsub("%s*([,:])%s*", "%1")
+
+	return json
+end
+
+local json_str = '"nil'
+
+local parser = Parser(minify_json(json_str))
+print(parser.json_str)
 
 local result = parser:generic_parse()
 for index, value in pairs(result) do
