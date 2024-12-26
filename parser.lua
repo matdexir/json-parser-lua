@@ -32,6 +32,11 @@ function Parser:parse_array(i)
 	local idx = 1
 	i = i + 1
 
+	local array_end_idx = self.json_str:find("]", i)
+	if array_end_idx == nil then
+		error("array is {" .. self.json_str:sub(i - 1, #self.json_str) .. "} not terminated")
+	end
+
 	while true do
 		local value, new_i = self:parse_value(i)
 		array_content[idx] = value
@@ -135,7 +140,7 @@ local minify_json = function(json)
 	return json
 end
 
-local json_str = '"nil'
+local json_str = '["nil", 2 3'
 
 local parser = Parser(minify_json(json_str))
 print(parser.json_str)
