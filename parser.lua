@@ -17,7 +17,7 @@ function Parser:generic_parse()
 
 	if c == "{" then
 		error("NOT IMPLEMENTED")
-		self.parse_obj(self)
+		self.parse_object(self)
 	elseif c == "[" then
 		return self.parse_array(self, 1)
 	else
@@ -126,7 +126,7 @@ function Parser:parse_value(i)
 	error("Unexpected character: " .. c)
 end
 
-function Parser:parse_obj() end
+function Parser:parse_object() end
 
 ---@param json string
 ---@return string
