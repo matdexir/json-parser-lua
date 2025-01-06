@@ -12,16 +12,15 @@ end
 
 ---@return any
 ---@return number
-function Parser:generic_parse()
-	local c = self.json_str:sub(1, 1)
+function Parser:generic_parse(i)
+	local c = self.json_str:sub(i, i)
 
 	if c == "{" then
-		error("NOT IMPLEMENTED")
-		self.parse_object(self)
+		return self.parse_object(self, i)
 	elseif c == "[" then
-		return self.parse_array(self, 1)
+		return self.parse_array(self, i)
 	else
-		return self.parse_value(self, 1)
+		return self.parse_value(self, i)
 	end
 end
 
@@ -62,7 +61,6 @@ function Parser:parse_value(i)
 
 	-- parse null
 	if c == "n" then
-		print(self.json_str:sub(i, i + 3))
 		assert(self.json_str:sub(i, i + 3) == "null", "Expected Null")
 		return BoxedNil, i + 3
 	end
@@ -126,7 +124,45 @@ function Parser:parse_value(i)
 	error("Unexpected character: " .. c)
 end
 
-function Parser:parse_object() end
+---@param i number
+---@return table
+---@return number
+function Parser:parse_object(i)
+	local new_object = {}
+
+	i = i + 1
+	while true do
+		if self.json_str:sub(i, i) == "}" then
+			return new_object, i
+		elseif self.json_str:sub(i, i) == "," then
+			print("comma " .. self.json_str:sub(i, i), i)
+			i = i + 1
+		end
+
+		-- parse key
+		local key, new_i = self.parse_value(self, i)
+		if type(key) ~= "string" then
+			error("key: " .. self.json_str:sub(i, new_i) .. " is not a valid string")
+		end
+		new_i = new_i + 1
+
+		i = new_i
+		-- parse colon
+		if self.json_str:sub(i, i) ~= ":" then
+			error("character " .. self.json_str:sub(i, i)(" after key was not a colon(:)"))
+		end
+		print("should be colon: " .. i, self.json_str:sub(i, i))
+		i = i + 1
+
+		-- parse value
+		local value
+		value, new_i = self.generic_parse(self, i)
+		print("should be value: " .. i, value, self.json_str:sub(i, new_i))
+
+		new_object[key] = value
+		i = new_i + 1
+	end
+end
 
 ---@param json string
 ---@return string
@@ -140,12 +176,12 @@ local minify_json = function(json)
 	return json
 end
 
-local json_str = '["nil", 2 3'
+local json_str = '{"key1":[1, 2, 3],"key2": "1"}'
 
 local parser = Parser(minify_json(json_str))
 print(parser.json_str)
 
-local result = parser:generic_parse()
+local result = parser:generic_parse(1)
 if type(result) == "table" then
 	for index, value in pairs(result) do
 		print(index, value, type(value))
