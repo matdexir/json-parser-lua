@@ -111,6 +111,11 @@ function Parser:parse_value(i)
 					str = str .. "\r"
 				elseif c == "t" then
 					str = str .. "\t"
+				elseif c == "u" then -- beautiful unicode
+					local unicode = self.json_str:sub(i - 1, i + 4)
+					i = i + 4
+					print("Unicode" .. unicode)
+					str = str .. unicode
 				else
 					error("Invalid escape character: " .. c)
 				end
@@ -176,7 +181,12 @@ local minify_json = function(json)
 	return json
 end
 
-local json_str = '{"key1":[1, 2, 3],"key2": "1"}'
+local json_str = [[ 
+{
+  "numbers": [ 2, 3, -20.23e+2, -4 ],
+  "currency": "\u20AC"
+}
+]]
 
 local parser = Parser(minify_json(json_str))
 print(parser.json_str)
