@@ -94,7 +94,7 @@ function Parser:parse_value(i)
 				break
 			elseif c == "\\" then
 				i = i + 1
-				c = self.json_str(i, i)
+				c = self.json_str:sub(i, i)
 				if c == '"' then
 					str = str .. '"'
 				elseif c == "\\" then
