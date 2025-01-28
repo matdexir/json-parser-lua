@@ -1,18 +1,18 @@
-Object = require("classic")
-Parser = Object:extend()
+local object = require("classic")
+local parser = object:extend()
 
-local BoxedNil = {}
-BoxedNil.value = nil
+local boxed_nil = {}
+boxed_nil.value = nil
 
 --- comment
 --- @param json_str string
-function Parser:new(json_str)
+function parser:new(json_str)
 	self.json_str = json_str
 end
 
 ---@return any
 ---@return number
-function Parser:generic_parse(i)
+function parser:generic_parse(i)
 	local c = self.json_str:sub(i, i)
 
 	if c == "{" then
@@ -26,7 +26,7 @@ end
 
 ---@return table
 ---@return number
-function Parser:parse_array(i)
+function parser:parse_array(i)
 	local array_content = {}
 	local idx = 1
 	i = i + 1
@@ -43,7 +43,7 @@ function Parser:parse_array(i)
 
 		i = new_i + 1
 		local c = self.json_str:sub(i, i)
-		print(c, i)
+		-- print(c, i)
 		if c == "]" then
 			return array_content, i + 1
 		elseif c == "," then
@@ -56,13 +56,13 @@ end
 ---@param i number
 ---@return any
 ---@return number
-function Parser:parse_value(i)
+function parser:parse_value(i)
 	local c = self.json_str:sub(i, i)
 
 	-- parse null
 	if c == "n" then
 		assert(self.json_str:sub(i, i + 3) == "null", "Expected Null")
-		return BoxedNil, i + 3
+		return boxed_nil, i + 3
 	end
 
 	-- parse true or false
@@ -114,7 +114,7 @@ function Parser:parse_value(i)
 				elseif c == "u" then -- beautiful unicode
 					local unicode = self.json_str:sub(i - 1, i + 4)
 					i = i + 4
-					print("Unicode" .. unicode)
+					-- print("Unicode" .. unicode)
 					str = str .. unicode
 				else
 					error("Invalid escape character: " .. c)
@@ -132,7 +132,7 @@ end
 ---@param i number
 ---@return table
 ---@return number
-function Parser:parse_object(i)
+function parser:parse_object(i)
 	local new_object = {}
 
 	i = i + 1
@@ -140,7 +140,7 @@ function Parser:parse_object(i)
 		if self.json_str:sub(i, i) == "}" then
 			return new_object, i
 		elseif self.json_str:sub(i, i) == "," then
-			print("comma " .. self.json_str:sub(i, i), i)
+			-- print("comma " .. self.json_str:sub(i, i), i)
 			i = i + 1
 		end
 
@@ -156,13 +156,13 @@ function Parser:parse_object(i)
 		if self.json_str:sub(i, i) ~= ":" then
 			error("character " .. self.json_str:sub(i, i)(" after key was not a colon(:)"))
 		end
-		print("should be colon: " .. i, self.json_str:sub(i, i))
+		-- print("should be colon: " .. i, self.json_str:sub(i, i))
 		i = i + 1
 
 		-- parse value
 		local value
 		value, new_i = self.generic_parse(self, i)
-		print("should be value: " .. i, value, self.json_str:sub(i, new_i))
+		-- print("should be value: " .. i, value, self.json_str:sub(i, new_i))
 
 		new_object[key] = value
 		i = new_i + 1
@@ -171,7 +171,7 @@ end
 
 ---@param json string
 ---@return string
-local minify_json = function(json)
+function parser:minify_json(json)
 	-- Remove whitespace (spaces, tabs, and newlines) between tokens
 	json = json:gsub("%s+", "") -- Remove all spaces, tabs, and newlines
 
@@ -181,21 +181,4 @@ local minify_json = function(json)
 	return json
 end
 
-local json_str = [[ 
-{
-  "numbers": [ 2, 3, -20.23e+2, -4 ],
-  "currency": "\u20AC"
-}
-]]
-
-local parser = Parser(minify_json(json_str))
-print(parser.json_str)
-
-local result = parser:generic_parse(1)
-if type(result) == "table" then
-	for index, value in pairs(result) do
-		print(index, value, type(value))
-	end
-else
-	print(result, type(result))
-end
+return parser
