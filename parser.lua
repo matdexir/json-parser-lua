@@ -44,7 +44,7 @@ function parser:parse_array(i)
 			i = i + 1
 		end
 
-		local value, new_i = self:parse_value(i)
+		local value, new_i = self:generic_parse(i)
 		array_content[idx] = value
 		idx = idx + 1
 
