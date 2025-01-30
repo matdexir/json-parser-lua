@@ -10,6 +10,8 @@ function parser:new(json_str)
 	self.json_str = json_str
 end
 
+-- NOTE: caller should be responsible for the incrementation whereas the callee has to give where the parsing ends.
+
 ---@return any
 ---@return number
 function parser:generic_parse(i)
