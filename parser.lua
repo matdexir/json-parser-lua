@@ -67,7 +67,7 @@ function parser:parse_value(i)
 
 	-- parse true or false
 	if c == "t" then
-		assert(self.json_str:sub(i, i + 4) == "true", "Expected True")
+		assert(self.json_str:sub(i, i + 3) == "true", "Expected True")
 		return true, i + 3
 	elseif c == "f" then
 		assert(self.json_str:sub(i, i + 5) == "false", "Expected True")
