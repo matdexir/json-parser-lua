@@ -70,7 +70,7 @@ function parser:parse_value(i)
 		assert(self.json_str:sub(i, i + 3) == "true", "Expected True")
 		return true, i + 3
 	elseif c == "f" then
-		assert(self.json_str:sub(i, i + 5) == "false", "Expected True")
+		assert(self.json_str:sub(i, i + 4) == "false", "Expected True")
 		return false, i + 4
 	end
 
