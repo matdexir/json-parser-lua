@@ -29,7 +29,6 @@ end
 function parser:parse_array(i)
 	local array_content = {}
 	local idx = 1
-	i = i + 1
 
 	local array_end_idx = self.json_str:find("]", i)
 	if array_end_idx == nil then
@@ -37,18 +36,19 @@ function parser:parse_array(i)
 	end
 
 	while true do
+		i = i + 1
 		local c = self.json_str:sub(i, i)
 		if c == "]" then
-			return array_content, i + 1
+			return array_content, i
 		elseif c == "," then
-			i = i + 1
+			-- do nothing, there is no continue statement in lua
+		else
+			local value, new_i = self:generic_parse(i)
+			array_content[idx] = value
+			idx = idx + 1
+			i = new_i
 		end
 
-		local value, new_i = self:generic_parse(i)
-		array_content[idx] = value
-		idx = idx + 1
-
-		i = new_i + 1
 	end
 end
 
