@@ -13,9 +13,10 @@ local target_files = utils:filterArray(files, function(x) return string.sub(x, 1
 for idx, file in ipairs(target_files) do
 	test[file] = function()
 		local test_file = io.open(prefix_path..file)
-		local minified_json = parser:minify_json(test_file:read("*all"))
-		local json = parser(minified_json)
-		test.is_not_nil(json:generic_parse(1))
+		local minified_test_input = parser:minify_json(test_file:read("*all"))
+		local json_parser = parser:new(nil, minified_test_input)
+		local parsed = json_parser:generic_parse(1)
+		test.is_not_nil(parsed)
 		test_file:close()
 	end
 end

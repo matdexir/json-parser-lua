@@ -1,20 +1,23 @@
-local object = require("classic")
-local parser = object:extend()
+local Parser = { json_str = "" }
 
 local boxed_nil = {}
 boxed_nil.value = nil
 
 --- comment
 --- @param json_str string
-function parser:new(json_str)
-	self.json_str = json_str
+function Parser:new(o, json_str)
+	o = o or {}
+	setmetatable(o, self)
+	self.__index = self
+	self.json_str = json_str or ""
+	return o
 end
 
 -- NOTE: caller should be responsible for the incrementation whereas the callee has to give where the parsing ends.
 
 ---@return any
 ---@return number
-function parser:generic_parse(i)
+function Parser:generic_parse(i)
 	local c = self.json_str:sub(i, i)
 
 	if c == "{" then
@@ -28,7 +31,7 @@ end
 
 ---@return table
 ---@return number
-function parser:parse_array(i)
+function Parser:parse_array(i)
 	local array_content = {}
 	local idx = 1
 
@@ -58,7 +61,7 @@ end
 ---@param i number
 ---@return any
 ---@return number
-function parser:parse_value(i)
+function Parser:parse_value(i)
 	local c = self.json_str:sub(i, i)
 
 	-- parse null
@@ -134,7 +137,7 @@ end
 ---@param i number
 ---@return table
 ---@return number
-function parser:parse_object(i)
+function Parser:parse_object(i)
 	local new_object = {}
 
 	i = i + 1
@@ -173,7 +176,7 @@ end
 
 ---@param json string
 ---@return string
-function parser:minify_json(json)
+function Parser:minify_json(json)
 	-- Remove whitespace (spaces, tabs, and newlines) between tokens
 	json = json:gsub("%s+", "") -- Remove all spaces, tabs, and newlines
 
@@ -183,4 +186,4 @@ function parser:minify_json(json)
 	return json
 end
 
-return parser
+return Parser
