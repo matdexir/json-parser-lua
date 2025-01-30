@@ -37,18 +37,18 @@ function parser:parse_array(i)
 	end
 
 	while true do
-		local value, new_i = self:parse_value(i)
-		array_content[idx] = value
-		idx = idx + 1
-
-		i = new_i + 1
 		local c = self.json_str:sub(i, i)
-		-- print(c, i)
 		if c == "]" then
 			return array_content, i + 1
 		elseif c == "," then
 			i = i + 1
 		end
+
+		local value, new_i = self:parse_value(i)
+		array_content[idx] = value
+		idx = idx + 1
+
+		i = new_i + 1
 	end
 end
 
